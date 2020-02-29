@@ -1,0 +1,2 @@
+gensim
+glove==1.0.0
