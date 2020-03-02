@@ -1,4 +1,3 @@
-
 # Inspired by: https://www.kdnuggets.com/2017/11/building-wikipedia-text-corpus-nlp.html
 
 import sys
