@@ -4,3 +4,4 @@ pandas
 argparse
 sklearn
 mittens
+nltk
