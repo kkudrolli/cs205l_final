@@ -6,7 +6,7 @@ class Example:
         self.sent = sent # input
         self.word = word # input
         self.sense = sense # label
-        self.pos = pos
+        self.pos = pos # part-of-speech, unused for now
     
     def __str__(self):
         return "({}.{}.{:02d}) : {}".format(self.word, self.pos, self.sense, self.sent)
@@ -36,7 +36,7 @@ class SemCor:
                 #print(entry)
                 
                 # check for no sense tag or multiword entries
-                # TODO is it ok to disclude multiword entries?
+                # TODO is it ok to exclude multiword entries?
                 if entry.label() and len(entry.leaves()) == 1: 
                     entry = entry.label().split('.')
 
