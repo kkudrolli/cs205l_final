@@ -15,3 +15,11 @@ fi
 if [ "$CMD" = "wiki" ]; then
     $PYTHON create_wiki_corpus.py $EXT/enwiki-latest-pages-articles.xml.bz2
 fi
+
+if [ "$CMD" = "train" ]; then
+    $PYTHON train.py \
+        --emb_file data/giga5_glv.pkl \
+        --model_name AverageLinear \
+        --context_size 1 \
+        --lr 0.1 
+fi
