@@ -4,12 +4,18 @@ EXT="/media/kkudrolli/Expansion Drive"
 CMD="$1"
 PYTHON=python3
 
-if [ "$CMD" = "cooccur" ]; then
+if [ "$CMD" = "cooccur_wiki" ]; then
     $PYTHON cooccur.py \
         --vocab_file "$EXT/enwiki/vocab.txt" \
         --corpus_file "$EXT/enwiki/wiki_en.txt" \
-        --cooccur_write_file "$EXT/enwiki/cooccur.csv" \
+        --corpus_name "wiki" \
         --num_lines 5 
+fi
+
+if [ "$CMD" = "cooccur_semcor" ]; then
+    $PYTHON cooccur.py \
+        --corpus_name "semcor" \
+        --is_semcor True
 fi
 
 if [ "$CMD" = "wiki" ]; then

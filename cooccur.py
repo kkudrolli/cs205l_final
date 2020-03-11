@@ -1,23 +1,29 @@
 import argparse
 import numpy as np
+from nltk.corpus import semcor
+import pickle
+import pandas as pd
 
 
-def read_corpus(corpus_file, num_lines=-1):
+def read_corpus(corpus_file, num_lines=-1, is_semcor=False):
     corpus = []
-    with open(corpus_file, 'r') as f:
-        for i,doc in enumerate(f.readlines()):
-            doc_words_list = doc.split()
-            corpus.append(doc_words_list)
+    if is_semcor:
+        corpus = semcor.sents()
+    else:
+        with open(corpus_file, 'r') as f:
+            for i,doc in enumerate(f.readlines()):
+                doc_words_list = doc.split()
+                corpus.append(doc_words_list)
 
-            # if specified,  stop after certain number of line
-            if num_lines > 0 and num_lines == i: 
-                return corpus
+                # if specified,  stop after certain number of line
+                if num_lines > 0 and num_lines == i: 
+                    return corpus
     return corpus
     
 
 def distinct_words(corpus, vocab_file=None):
     if vocab_file:
-        with open(args.vocab_file, 'r') as f:
+        with open(vocab_file, 'r') as f:
             words = [x.rstrip().split(' ')[0] for x in f.readlines()]
             num_words = len(words)
             return words, num_words
@@ -60,22 +66,28 @@ def create_cooccur_matrix(corpus, vocab_file=None, window_size=15):
                 col = word2Ind[win_word]
                 M[row][col] += 1
 
-    return M
+    return M, word2Ind
 
-def write_matrix_to_file(cooccur_matrix, cooccur_write_file):
-    np.savetxt(cooccur_write_file, cooccur_matrix, delimeter=',')
+def write_matrix_to_file(cooccur_matrix, word2Ind, corpus_name):
+    cooccur_matrix_df = pd.DataFrame(cooccur_matrix)
+    cooccur_matrix_df.to_pickle("/media/kkudrolli/Expansion Drive/semcor/{}.pkl".format(corpus_name))
+    with open("/media/kkudrolli/Expansion Drive/semcor/{}_word2Ind.pkl".format(corpus_name), 'wb') as cf:
+        pickle.dump(word2Ind, cf)
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--vocab_file', default='vocab.txt', type=str)
+    parser.add_argument('--vocab_file', default=None, type=str)
     parser.add_argument('--corpus_file', default='wiki_en.txt', type=str)
-    parser.add_argument('--cooccur_write_file', default='cooccur.txt', type=str)
     parser.add_argument('--num_lines', default=-1, type=int)
+    # only bottom two needed for semcor
+    parser.add_argument('--corpus_name', default='semcor', type=str)
+    parser.add_argument('--is_semcor', default=False, type=bool)
     args = parser.parse_args()
 
-    corpus = read_corpus(args.corpus_file, args.num_lines)
-    cooccur_matrix = create_cooccur_matrix(corpus, args.vocab_file)
-    write_matrix_to_file(cooccur_matrix, args.cooccur_write_file)
+    corpus = read_corpus(args.corpus_file, args.num_lines, args.is_semcor)
+    cooccur_matrix, word2Ind = create_cooccur_matrix(corpus, args.vocab_file)
+    write_matrix_to_file(cooccur_matrix, word2Ind, args.corpus_name)
 
 if __name__ == "__main__":
     main()
