@@ -19,7 +19,7 @@ fi
 if [ "$CMD" = "train" ]; then
     $PYTHON train.py \
         --emb_file data/giga5_glv.pkl \
-        --model_name AverageLinear \
+        --model_name LSTMEncoder \
         --context_size 1 \
         --lr 0.1 
 fi

@@ -1,5 +1,5 @@
 from dataset import SemCor
-from models import AverageLinear
+from models import AverageLinear, LSTMEncoder
 from utils import split_data, batch_iter
 
 import torch
@@ -7,20 +7,22 @@ import os
 import pickle
 import torch.nn as nn
 import pandas as pd
+import numpy as np
 import argparse
 
-# TODO add model: RNN encoder that takes in the context (so it's a fixed length)
 # TODO look up word senses for each word?
-# TODO consider creating co-occurrence matrix with semcor
+# TODO all preds same bc too many out of vocab word vecs (try making cooccur out of semcor)?
+# TODO add model save and reload
+# TODO to make co-occure can repurpose old code, just replace read_corpus with semcor.sents(), write matrix with pandas stuff, modify cooccur.py, then word_vectors.py, then unks
 
 def evaluate_accuracy(model, data, batch_size):
-    num_correct = 0
+    num_correct = 0.0
     for contexts, words, senses in batch_iter(data, batch_size, shuffle=False):
         scores = model(contexts, words)
-        preds = torch.argmax(scores)
+        preds = torch.argmax(scores, dim=1)
         num_correct += preds.eq(senses).sum()
 
-    accuracy = (num_correct / len(data))*100
+    accuracy = (float(num_correct) / len(data))*100
     return accuracy
 
 def validate(model, val_data, epoch, train_iter, batch_size=128):
@@ -63,7 +65,6 @@ def train(model, train_data, val_data, args):
                 validate(model, val_data, epoch, train_iter)
 
             train_iter += 1
-            # TODO add model save and reload
 
 def test(model, test_data, batch_size=128):
     model.eval()
@@ -86,7 +87,12 @@ def main():
     parser.add_argument('--batch_size', default=16, type=int)
     parser.add_argument('--val_iter', default=500, type=int)
     parser.add_argument('--print_iter', default=200, type=int)
+    parser.add_argument('--hidden_size', default=50, type=int)
     args = parser.parse_args()
+
+    # set random seeds
+    #np.random.seed(100)
+    #torch.manual_seed(10)
 
     # get the data
     if args.load_corpus_from_file and os.path.exists(args.corpus_file):
@@ -112,6 +118,8 @@ def main():
     # make the model
     if args.model_name == "AverageLinear":
         model = AverageLinear(dataset.max_num_senses, emb_weight_matrix, emb_weight_matrix_df)
+    if args.model_name == "LSTMEncoder":
+        model = LSTMEncoder(dataset.max_num_senses, args.hidden_size, emb_weight_matrix, emb_weight_matrix_df)
     else:
         raise Exception("Invalid model name: {}".format(args.model_name))
 
