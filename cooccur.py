@@ -69,9 +69,10 @@ def create_cooccur_matrix(corpus, vocab_file=None, window_size=15):
     return M, word2Ind
 
 def write_matrix_to_file(cooccur_matrix, word2Ind, corpus_name):
+    EXT="/media/kkudrolli/Expansion Drive/semcor"
     cooccur_matrix_df = pd.DataFrame(cooccur_matrix)
-    cooccur_matrix_df.to_pickle("/media/kkudrolli/Expansion Drive/semcor/{}.pkl".format(corpus_name))
-    with open("/media/kkudrolli/Expansion Drive/semcor/{}_word2Ind.pkl".format(corpus_name), 'wb') as cf:
+    cooccur_matrix_df.to_pickle("{}/{}.pkl".format(EXT, corpus_name))
+    with open("{}/{}_word2Ind.pkl".format(EXT, corpus_name), 'wb') as cf:
         pickle.dump(word2Ind, cf)
 
 
